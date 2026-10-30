@@ -42,6 +42,16 @@ Ou, no Explorer, dê duplo clique em **`Vitals.bat`**: ele instala as
 dependências e compila na primeira vez, depois só abre o app. Use
 `Vitals.bat --rebuild` para forçar o build e `Vitals.bat --dev` para HMR.
 
+Para gerar um **executável portátil** (não exige Node no destino):
+
+```powershell
+npm run dist
+# saída: dist\Vitals-0.1.0-portatil.exe  (~106 MB, arquivo único)
+```
+
+O `.env`, se existir ao lado do `.exe`, é lido automaticamente. O binário não
+é assinado; o Windows pode mostrar o aviso do SmartScreen na primeira execução.
+
 Sem abrir janela (útil para agente ou máquina remota):
 
 ```powershell
@@ -60,6 +70,8 @@ npx tsx scripts/probe.ts --json   # snapshot completo, JSON puro (sem log)
 | `Vitals.bat` | Abre o app (instala/compila se preciso) |
 | `Vitals.bat --rebuild` | Força `npm run build` antes de abrir |
 | `Vitals.bat --dev` | Abre em modo desenvolvimento (HMR) |
+| `npm run dist` | Gera `dist\Vitals-<versao>-portatil.exe` |
+| `npm run dist:dir` | Gera `dist\win-unpacked\Vitals.exe` (sem empacotar) |
 | `npm run dev` | Electron + renderer em modo desenvolvimento |
 | `npm run build` | Compila main/preload/renderer e copia o sensor para `out/main` |
 | `npm start` | Preview do build (`electron-vite preview`) |

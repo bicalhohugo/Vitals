@@ -12,12 +12,13 @@
 - [x] API REST + SSE + token para ações remotas.
 - [x] `doctor`, `probe` (texto/JSON/serve), 40 testes, build copiando assets.
 - [x] Lançador Windows (`Vitals.bat`) com instalação/build sob demanda.
+- [x] Executável portátil (`npm run dist`), ícone e `.env` ao lado do `.exe`.
 - [x] Documentação completa e worklog.
 
 ## Próximo (v0.2)
 
-- [ ] **Empacotamento**: `electron-builder` (NSIS portátil), ícone, atalho,
-      assinatura. Hoje só roda via `npm run dev`/`build`.
+- [ ] **Assinatura de código + instalador NSIS**. Hoje o portable não é
+      assinado (SmartScreen) e não há atalho no menu Iniciar.
 - [ ] **Bandeja + janela always-on-top opcional**, para deixar o HUD num
       segundo monitor.
 - [ ] **Alertas**: notificação do Windows quando commit/VRAM cruzam o limite

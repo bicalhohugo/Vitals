@@ -53,9 +53,44 @@ Atalho: botão direito em `Vitals.bat` → **Enviar para → Área de trabalho
 (criar atalho)**. O console pisca por um instante; é normal.
 
 > `Vitals.bat` **não** é um executável independente: ele exige Node.js e a
-> pasta `node_modules`. Para distribuir sem Node, é preciso empacotar com
-> `electron-builder` (ver docs/ROADMAP.md). O `.env` é lido do diretório de
-> trabalho; o lançador garante que seja a raiz do projeto.
+> pasta `node_modules`. Para levar para outra máquina sem Node, use o
+> empacotamento abaixo.
+
+## Empacotar (.exe portátil)
+
+```powershell
+npm run dist        # build + electron-builder (portable x64)
+npm run dist:dir    # só dist\win-unpacked\Vitals.exe, sem empacotar
+```
+
+Saída: **`dist\Vitals-<versao>-portatil.exe`** (~106 MB, arquivo único).
+Configuração em `electron-builder.yml`; ícone em `build/icon.png`.
+
+Como o pacote funciona:
+
+- `files` inclui apenas `out/**` e `package.json` (o renderer é um bundle; não
+  há dependências de runtime em `node_modules`).
+- O sensor `.ps1` vai dentro do `app.asar`, mas o TypeScript o **lê e copia
+  para `%TEMP%\vitals`** antes de chamar o `pwsh` — por isso não precisa de
+  `asarUnpack`.
+- `.env` é procurado, nesta ordem: diretório de trabalho, pasta do `.exe`
+  portátil (`PORTABLE_EXECUTABLE_DIR`) e pasta do executável. Para configurar,
+  coloque o `.env` **ao lado do `.exe`**.
+- Logs e auditoria continuam em `%APPDATA%\Vitals\logs`.
+
+O binário **não é assinado**. Na primeira execução o Windows pode mostrar
+"O Windows protegeu o computador" (SmartScreen); use **Mais informações →
+Executar assim mesmo**. Para distribuir de verdade, configure um certificado
+de assinatura de código.
+
+Teste rápido do pacote:
+
+```powershell
+Start-Process .\dist\Vitals-0.1.0-portatil.exe
+Invoke-RestMethod http://127.0.0.1:4780/api/snapshot | Select-Object schema
+```
+
+`dist/` não vai para o git.
 
 ## Rodar sem Electron (agente / headless)
 

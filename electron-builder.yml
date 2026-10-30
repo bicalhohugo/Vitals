@@ -1,0 +1,26 @@
+appId: com.vitals.hud
+productName: Vitals
+copyright: Copyright © 2026 Hugo Bicalho
+
+directories:
+  output: dist
+  buildResources: build
+
+# Só o bundle compilado + package.json. O sensor .ps1 vai em out/main e é
+# copiado para %TEMP% em runtime (não precisa de asarUnpack).
+files:
+  - out/**/*
+  - package.json
+
+asar: true
+
+win:
+  target:
+    - target: portable
+      arch:
+        - x64
+  icon: build/icon.png
+  artifactName: Vitals-${version}-portatil.${ext}
+
+portable:
+  artifactName: Vitals-${version}-portatil.${ext}

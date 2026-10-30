@@ -83,6 +83,19 @@ do header (`8C/16T`).
 - Prefira funções puras e testáveis para parsing/regra.
 - `list`/`Map` grandes: não recalcule a cada render sem `useMemo`.
 
+## Empacotamento
+
+- `npm run dist` gera `dist\Vitals-<versao>-portatil.exe` (portable x64);
+  `npm run dist:dir` gera só `dist\win-unpacked\Vitals.exe`.
+- `files` no `electron-builder.yml` é whitelist. Asset novo necessário em
+  runtime fora de `out/` precisa entrar ali.
+- O `.ps1` é lido do `asar` e copiado para `%TEMP%\vitals` antes do spawn.
+  **Não** adicione `asarUnpack` para ele.
+- `.env` é procurado em: cwd, `PORTABLE_EXECUTABLE_DIR`, pasta do executável.
+  Teste com um `.env` ao lado do portable ao mexer em config.
+- `dist/` é ignorado pelo git; não commite binários.
+- Sem assinatura: SmartScreen aparece. Não é bug.
+
 ## Armadilhas já encontradas
 
 - **`[ordered]@{ adapters = @($list) }` quebra** em PowerShell com

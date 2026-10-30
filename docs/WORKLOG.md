@@ -7,6 +7,46 @@ Formato: data, objetivo, mudanças, descobertas, validação, pendências.
 
 ---
 
+## 2026-10-30 (3) — Executável portátil
+
+**Objetivo:** gerar um `.exe` de arquivo único, sem exigir Node no destino.
+
+### Mudanças
+
+- `electron-builder` 26.18 como devDependency; scripts `npm run dist` e
+  `npm run dist:dir`.
+- `electron-builder.yml`: alvo `portable` x64, `files` com whitelist
+  (`out/**`, `package.json`), `asar: true`, ícone `build/icon.png`.
+- Ícone 512×512 gerado com `System.Drawing` (fundo escuro, grade e ECG verde).
+- `loadDotEnv` passou a procurar `.env` em: cwd,
+  `PORTABLE_EXECUTABLE_DIR` (portable) e `dirname(process.execPath)`
+  (instalado). Antes só cwd.
+- `package.json` ganhou `author`.
+
+### Por que não precisou de `asarUnpack`
+
+O sensor TS lê o `.ps1` via `fs` (o Electron redireciona leitura dentro do
+`asar`) e grava uma cópia em `%TEMP%\vitals\windows-sensor.ps1` antes de
+chamar o `pwsh`. O filho nunca abre o caminho dentro do `asar`.
+
+### Validação
+
+- `dist\Vitals-0.1.0-portatil.exe` = **105,6 MB**.
+- Executado com um `.env` ao lado (`VITALS_HTTP_PORT=4798`):
+  - `/api/snapshot` respondeu na 4798 (confirma `PORTABLE_EXECUTABLE_DIR`);
+  - `cores=8`, `threads=16`; 3 GPUs (NVIDIA, AMD, WARP);
+  - sensor `live`, `3 adaptador(es)`, 0 reinícios;
+  - workloads reais (ComfyUI 4,0 GB VRAM / 19 GB commit).
+- Processos encerrados após o teste; `.env` removido; `dist/` fora do git.
+
+### Pendências
+
+- Assinatura de código (SmartScreen) e instalador NSIS com atalho.
+- Testar o portable em uma máquina limpa (sem Node) — o teste foi na mesma
+  máquina, mas o pacote não referencia `node_modules`.
+
+---
+
 ## 2026-10-30 (2) — Lançador Windows
 
 **Objetivo:** abrir o app com duplo clique, sem decorar comandos npm.

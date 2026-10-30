@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs'
 import { homedir } from 'node:os'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 
 export interface AppConfig {
   sampleIntervalMs: number
@@ -44,14 +44,28 @@ function defaultLogDir(): string {
   return join(homedir(), '.local', 'share', 'vitals', 'logs')
 }
 
-/** Carrega .env do diretorio de trabalho, se existir. Sem dependencia externa. */
+/** Caminhos candidatos para o .env, do mais obvio ao especifico do pacote. */
+function dotEnvCandidates(cwd: string): string[] {
+  const candidates = [join(cwd, '.env')]
+  // electron-builder portable define esta variavel com a pasta do .exe real.
+  const portableDir = process.env.PORTABLE_EXECUTABLE_DIR
+  if (portableDir) candidates.push(join(portableDir, '.env'))
+  // Instalado (NSIS/dir): .env ao lado do executavel.
+  const exeDir = dirname(process.execPath)
+  if (exeDir) candidates.push(join(exeDir, '.env'))
+  return [...new Set(candidates)]
+}
+
+/** Carrega .env do diretorio de trabalho ou de ao lado do executavel. */
 export function loadDotEnv(cwd = process.cwd()): void {
-  const file = join(cwd, '.env')
-  if (!existsSync(file)) return
-  try {
-    process.loadEnvFile(file)
-  } catch {
-    // .env invalido nao deve impedir o app de subir; o doctor mostra o problema.
+  for (const file of dotEnvCandidates(cwd)) {
+    if (!existsSync(file)) continue
+    try {
+      process.loadEnvFile(file)
+      return
+    } catch {
+      // .env invalido nao deve impedir o app de subir; o doctor mostra o problema.
+    }
   }
 }
 
