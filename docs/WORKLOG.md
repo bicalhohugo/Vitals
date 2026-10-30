@@ -7,6 +7,37 @@ Formato: data, objetivo, mudanças, descobertas, validação, pendências.
 
 ---
 
+## 2026-10-30 (2) — Lançador Windows
+
+**Objetivo:** abrir o app com duplo clique, sem decorar comandos npm.
+
+### Mudanças
+
+- `Vitals.bat` na raiz: confere Node/npm/pwsh, instala dependências e compila
+  sob demanda, abre o Electron com o projeto como working dir.
+  Flags `--rebuild` e `--dev`.
+- `src/main/index.ts` passou a chamar `loadDotEnv()` antes de `loadConfig()`.
+  Antes só o probe lia `.env`; na janela Electron a configuração era ignorada.
+
+### Descobertas
+
+- `start "" "electron.exe" "%~dp0"` **falha silenciosamente**: o argumento
+  citado termina em `\`, que escapa a aspa na linha de comando. Solução:
+  `start "" /d "%~dp0" "electron.exe" .`.
+- Capturar a saída de `cmd /c Vitals.bat` no PowerShell **trava**: o Electron
+  herda o stdout e o pipe só fecha quando o app fecha. Em teste, use
+  `Start-Process` sem redirecionar.
+- `npm start` (electron-vite preview) não é necessário: `electron.exe .` usa
+  `package.json main` e carrega `out/renderer` direto.
+
+### Validação
+
+- `Vitals.bat` abriu o app; `/api/health` respondeu em `4799` (porta vinda de
+  um `.env` temporário), sensor publicou a primeira amostra em ~4 s.
+- `.env` removido depois do teste; config padrão intacta.
+
+---
+
 ## 2026-10-30 — Sensor saudável, memória honesta, docs
 
 **Objetivo:** fechar o schema 2 com dados reais (3 adaptadores, CPU% por

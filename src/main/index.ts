@@ -8,12 +8,13 @@ import type {
   TerminateWorkloadRequest
 } from '@shared/types'
 import { IPC } from '@shared/ipc'
-import { loadConfig } from './config'
+import { loadConfig, loadDotEnv } from './config'
 import { initLogger, closeLogger, log } from './logger'
 import { TelemetryEngine } from './telemetry/engine'
 import { ActionService } from './actions/terminate'
 import { VitalsHttpServer } from './http/server'
 
+loadDotEnv()
 const config = loadConfig()
 initLogger(config.logDir)
 

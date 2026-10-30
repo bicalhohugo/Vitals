@@ -11,6 +11,7 @@
 - [x] UI de console (GPU, workloads, processos, rail, histórico).
 - [x] API REST + SSE + token para ações remotas.
 - [x] `doctor`, `probe` (texto/JSON/serve), 40 testes, build copiando assets.
+- [x] Lançador Windows (`Vitals.bat`) com instalação/build sob demanda.
 - [x] Documentação completa e worklog.
 
 ## Próximo (v0.2)

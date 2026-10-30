@@ -30,6 +30,33 @@ npm start          # preview do build
 O app abre em 1480×940, tema escuro, pt-BR. A API embutida sobe junto em
 `127.0.0.1:4780` quando `VITALS_HTTP=1`.
 
+## Lançador (Vitals.bat)
+
+Duplo clique em `Vitals.bat` na raiz do projeto. Ele:
+
+1. confere Node.js, npm e `pwsh`;
+2. roda `npm install` se `node_modules\electron` não existir;
+3. roda `npm run build` se `out\main\index.js` ou `out\renderer\index.html`
+   faltarem;
+4. abre o Electron com o diretório do projeto como working dir (para achar o
+   `.env`).
+
+Flags:
+
+```powershell
+Vitals.bat            # abrir
+Vitals.bat --rebuild  # recompilar antes (use apos git pull)
+Vitals.bat --dev      # modo desenvolvimento com HMR
+```
+
+Atalho: botão direito em `Vitals.bat` → **Enviar para → Área de trabalho
+(criar atalho)**. O console pisca por um instante; é normal.
+
+> `Vitals.bat` **não** é um executável independente: ele exige Node.js e a
+> pasta `node_modules`. Para distribuir sem Node, é preciso empacotar com
+> `electron-builder` (ver docs/ROADMAP.md). O `.env` é lido do diretório de
+> trabalho; o lançador garante que seja a raiz do projeto.
+
 ## Rodar sem Electron (agente / headless)
 
 ```powershell

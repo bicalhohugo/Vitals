@@ -38,6 +38,10 @@ npm run doctor      # checa pwsh, contadores, nvidia-smi e porta 4780
 npm run dev         # app Electron com HMR
 ```
 
+Ou, no Explorer, dê duplo clique em **`Vitals.bat`**: ele instala as
+dependências e compila na primeira vez, depois só abre o app. Use
+`Vitals.bat --rebuild` para forçar o build e `Vitals.bat --dev` para HMR.
+
 Sem abrir janela (útil para agente ou máquina remota):
 
 ```powershell
@@ -53,6 +57,9 @@ npx tsx scripts/probe.ts --json   # snapshot completo, JSON puro (sem log)
 
 | Comando | O que faz |
 | --- | --- |
+| `Vitals.bat` | Abre o app (instala/compila se preciso) |
+| `Vitals.bat --rebuild` | Força `npm run build` antes de abrir |
+| `Vitals.bat --dev` | Abre em modo desenvolvimento (HMR) |
 | `npm run dev` | Electron + renderer em modo desenvolvimento |
 | `npm run build` | Compila main/preload/renderer e copia o sensor para `out/main` |
 | `npm start` | Preview do build (`electron-vite preview`) |
