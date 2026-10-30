@@ -166,10 +166,8 @@ export class ActionService {
     try {
       // 1) Graceful: pede para fechar, sem /F.
       for (const pid of requested) {
-        if (!isAlive(pid)) {
-          killed.push(pid)
-          continue
-        }
+        // Ja morto: o laco final contabiliza uma unica vez.
+        if (!isAlive(pid)) continue
         try {
           await execFileAsync('taskkill', ['/PID', String(pid)], {
             timeout: 5000,

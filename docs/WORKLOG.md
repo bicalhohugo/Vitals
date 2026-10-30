@@ -51,6 +51,12 @@ outros agentes.
    - Fix: `VITALS_LOG_SILENT=1` automático no probe com `--json`.
    - Validado: `npx tsx scripts/probe.ts --json` parseia direto.
 
+7. **`killedPids` duplicava** quando o alvo já estava morto: o laço gracioso
+   empurrava o PID e o laço final empurrava de novo (mensagem "2 processos").
+   - Fix: o laço gracioso ignora PIDs já mortos; a contabilização fica só no
+     laço final.
+   - Validado via API: gracioso derruba 1; força em PID morto reporta 1.
+
 ### Validação
 
 - `npm run typecheck` limpo.
@@ -63,6 +69,14 @@ outros agentes.
     DOM/evaluate.
 - JSON: 252 processos, 41 workloads, 0 `cpuPct` nulo, VRAM atribuída ao LUID
   `luid:0x00000000:0x0000CE41`.
+- **Ejeção end-to-end** (API, porta 4783, token + remote actions):
+  - processo descartável `pwsh -Command Start-Sleep` → `graceful` → `ok=true`,
+    `verified=true`, `killed=[pid]`, morto;
+  - segundo POST `force` no mesmo PID já morto → `killed=[pid]` (sem
+    duplicata), mensagem "1 processo";
+  - tentativa em PID inexistente → `allowed=false`, `result=blocked`,
+    `origin=api` no `audit.jsonl`.
+  - Nenhum workload real (ComfyUI/LM Studio) foi tocado.
 
 ### Descobertas
 
