@@ -85,16 +85,23 @@ do header (`8C/16T`).
 
 ## Empacotamento
 
-- `npm run dist` gera `dist\Vitals-<versao>-portatil.exe` (portable x64);
-  `npm run dist:dir` gera só `dist\win-unpacked\Vitals.exe`.
+- `npm run dist` gera `dist\Vitals-<versao>-portatil.exe`; `dist:setup` gera o
+  instalador NSIS `dist\Vitals-<versao>-setup.exe`; `dist:all` gera os dois;
+  `dist:dir` gera só `dist\win-unpacked\Vitals.exe`.
 - `files` no `electron-builder.yml` é whitelist. Asset novo necessário em
-  runtime fora de `out/` precisa entrar ali.
+  runtime fora de `out/` precisa entrar ali. `build/tray.png` é copiado para
+  `out/main` pelo `scripts/copy-assets.mjs`.
 - O `.ps1` é lido do `asar` e copiado para `%TEMP%\vitals` antes do spawn.
   **Não** adicione `asarUnpack` para ele.
 - `.env` é procurado em: cwd, `PORTABLE_EXECUTABLE_DIR`, pasta do executável.
   Teste com um `.env` ao lado do portable ao mexer em config.
+- Instalador NSIS é **por usuário** (`perMachine: false`) e assistido
+  (`oneClick: false`); cria atalhos e preserva `%APPDATA%\Vitals` ao desinstalar.
+- Bandeja: fechar a janela esconde (só se `tray` existir), `Sair` encerra.
+  `VITALS_TRAY=0` desliga. Não esconda a janela quando a bandeja falhar.
+- Assinatura: `CSC_LINK` + `CSC_KEY_PASSWORD`; sem isso o build loga
+  `signing is skipped` e o SmartScreen aparece. Não é bug.
 - `dist/` é ignorado pelo git; não commite binários.
-- Sem assinatura: SmartScreen aparece. Não é bug.
 
 ## Armadilhas já encontradas
 
@@ -110,6 +117,9 @@ do header (`8C/16T`).
   viram workload próprio. Não é bug do agrupamento dos stacks de IA.
 - **WARP** (`Microsoft Basic Render Driver`) é filtrado na UI quando ocioso.
 - **`npm run probe -- --json`** inclui banner do npm. Use `npx tsx` direto.
+- **`taskkill /PID <main>` sem `/F` não encerra** quando a bandeja está ativa:
+  ele manda WM_CLOSE, a janela esconde e o processo continua. Para testes, mate
+  com `/F` ou use `Sair`; o comportamento é proposital.
 - Ao editar arquivos com o tool de edição, **não escreva `\n` literal** dentro
   de string de uma linha; use quebras reais. Já comentou um `sort` inteiro por
   acidente.
@@ -117,6 +127,8 @@ do header (`8C/16T`).
 ## Definição de pronto
 
 - Código + testes + typecheck + build.
+- Mexeu em empacotamento/bandeja? Rode `npm run dist:all` e teste instalar,
+  `/api/health`, fechar para a bandeja e desinstalar (silencioso).
 - Docs afetados atualizados (`CONTRACTS.md` se o schema mudou; `WORKLOG.md`
   sempre).
 - Nenhuma ação destrutiva nova sem auditoria e política.

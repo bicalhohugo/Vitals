@@ -7,6 +7,56 @@ Formato: data, objetivo, mudanças, descobertas, validação, pendências.
 
 ---
 
+## 2026-10-30 (4) — Bandeja, instalador NSIS e assinatura (preparada)
+
+**Objetivo:** fechar a distribuição: bandeja para manter o HUD vivo, instalador
+com atalhos e caminho documentado para assinatura.
+
+### Mudanças
+
+- `src/main/index.ts`: `Tray` com menu (abrir, saúde, RAM/commit, GPU, logs,
+  sair), tooltip atualizado por snapshot (throttle de 15 s) e clique alternando
+  a janela. Fechar esconde **só se** a bandeja existir; `before-quit` marca
+  `isQuitting` e destrói a bandeja.
+- `VITALS_TRAY` (padrão `1`) em `config.ts` e `.env.example`.
+- `build/tray.png` (64×64, ECG transparente) copiado para `out/main` pelo
+  `copy-assets`; fallback para `build/tray.png` em desenvolvimento.
+- `electron-builder.yml`: alvo `nsis` (por usuário, assistido, atalhos no
+  Desktop e Menu Iniciar, `deleteAppDataOnUninstall: false`) e
+  `artifactName` por alvo.
+- Scripts `dist:setup` e `dist:all`.
+- Docs: README, OPERATIONS (bandeja, instalador, assinatura), ROADMAP, AGENTS.
+
+### Validação
+
+- `npm run typecheck` limpo; 40 testes passando.
+- `dist\Vitals-0.1.0-portatil.exe` = 105,6 MB;
+  `dist\Vitals-0.1.0-setup.exe` = 116,4 MB.
+- Instalação silenciosa `/S /D=D:\Monitor\dist\install-test`: exit 0, atalhos no
+  Desktop e Menu Iniciar, `Uninstall Vitals.exe`, registro `Vitals 0.1.0`.
+- App instalado: `/api/health` OK, sensor `live`, 3 GPUs, `8C/16T`, log
+  `tray: icone criado`.
+- `taskkill /PID <main>` sem `/F`: processo sobreviveu e log registrou
+  `minimizada para a bandeja`; depois `Stop-Process -Force`.
+- Desinstalação `/S`: exit 0; pasta, atalhos e registro removidos; logs
+  preservados.
+- Portátil re-testado após a bandeja: health OK e tray criada.
+
+### Descobertas / armadilhas
+
+- `taskkill` sem `/F` em app com bandeja **não encerra** — é o teste correto do
+  WM_CLOSE, mas confunde se o objetivo era matar.
+- Instalador NSIS: `/D=` precisa ser o **último** argumento.
+- Se `tray.png` faltar/for inválido, não esconder a janela (evita app preso).
+- Ícone de 512 px na bandeja fica ruim; usar 64 px e `resize({16, 16})`.
+
+### Pendências
+
+- Assinatura real: só falta certificado (`CSC_LINK`/`CSC_KEY_PASSWORD`).
+- Testar em máquina limpa (sem Node/pwsh) e auto-update.
+
+---
+
 ## 2026-10-30 (3) — Executável portátil
 
 **Objetivo:** gerar um `.exe` de arquivo único, sem exigir Node no destino.

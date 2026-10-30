@@ -21,6 +21,9 @@ VRAM. O objetivo não é ser um Task Manager bonito: é responder rápido
 - Ejeção graciosa com escalonamento explícito para força, política de proteção
   e auditoria em JSONL.
 - API HTTP local (REST + SSE) para agentes e para a UI em modo navegador.
+- Bandeja do sistema: fechar a janela esconde o HUD; **Sair** no menu encerra.
+- Pacote portátil e instalador NSIS por usuário (atalhos no Desktop e Menu
+  Iniciar), ambos sem exigir Node no destino.
 - 40 testes cobrindo invariantes de segurança, agrupamento e parsing.
 
 ## Requisitos
@@ -42,15 +45,21 @@ Ou, no Explorer, dê duplo clique em **`Vitals.bat`**: ele instala as
 dependências e compila na primeira vez, depois só abre o app. Use
 `Vitals.bat --rebuild` para forçar o build e `Vitals.bat --dev` para HMR.
 
-Para gerar um **executável portátil** (não exige Node no destino):
+Para gerar os binários (não exigem Node no destino):
 
 ```powershell
-npm run dist
-# saída: dist\Vitals-0.1.0-portatil.exe  (~106 MB, arquivo único)
+npm run dist        # portátil: dist\Vitals-0.1.0-portatil.exe (~106 MB)
+npm run dist:setup  # instalador: dist\Vitals-0.1.0-setup.exe (~116 MB)
+npm run dist:all    # os dois
 ```
 
-O `.env`, se existir ao lado do `.exe`, é lido automaticamente. O binário não
-é assinado; o Windows pode mostrar o aviso do SmartScreen na primeira execução.
+O `.env`, se existir ao lado do `.exe`, é lido automaticamente. Os binários não
+são assinados; o Windows pode mostrar o aviso do SmartScreen na primeira
+execução.
+
+Ao fechar a janela, o Vitals vai para a **bandeja** e continua monitorando. Para
+encerrar de verdade, use **Sair** no menu da bandeja (ou `VITALS_TRAY=0` para
+fechar direto). Veja [docs/OPERATIONS.md](docs/OPERATIONS.md).
 
 Sem abrir janela (útil para agente ou máquina remota):
 
@@ -71,6 +80,8 @@ npx tsx scripts/probe.ts --json   # snapshot completo, JSON puro (sem log)
 | `Vitals.bat --rebuild` | Força `npm run build` antes de abrir |
 | `Vitals.bat --dev` | Abre em modo desenvolvimento (HMR) |
 | `npm run dist` | Gera `dist\Vitals-<versao>-portatil.exe` |
+| `npm run dist:setup` | Gera `dist\Vitals-<versao>-setup.exe` (NSIS) |
+| `npm run dist:all` | Gera portátil + instalador |
 | `npm run dist:dir` | Gera `dist\win-unpacked\Vitals.exe` (sem empacotar) |
 | `npm run dev` | Electron + renderer em modo desenvolvimento |
 | `npm run build` | Compila main/preload/renderer e copia o sensor para `out/main` |
@@ -94,6 +105,7 @@ Copie `.env.example` para `.env`. Os principais:
 | `VITALS_ACTIONS` | `1` | Habilita ejeção na UI |
 | `VITALS_GRACEFUL_TIMEOUT_MS` | `3000` | Espera antes de sugerir "forçar" |
 | `VITALS_PORTS_MS` | `10000` | Intervalo do `netstat` |
+| `VITALS_TRAY` | `1` | Bandeja; fechar a janela esconde o HUD |
 | `VITALS_LOG_DIR` | `%APPDATA%\Vitals\logs` | Logs e auditoria |
 | `VITALS_HTTP_TOKEN` | vazio | Token (>= 16 chars) para ações via HTTP |
 | `VITALS_REMOTE_ACTIONS` | `0` | Liga `POST /api/terminate` (exige token) |

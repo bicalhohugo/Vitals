@@ -29,6 +29,10 @@ O renderer não conhece fonte de dados: `src/renderer/src/api.ts` usa
 `window.vitals` quando existe (Electron) e cai para `/api/snapshot` +
 `EventSource('/api/events')` quando aberto no navegador.
 
+O main também mantém a **bandeja** (`Tray`): fechar a janela esconde, o menu
+mostra saúde/RAM/commit/GPU e **Sair** encerra motor, HTTP e logger. Se o ícone
+não puder ser criado, a janela fecha normalmente (não fica presa sem interface).
+
 ## O laço de telemetria
 
 `TelemetryEngine.start()`:

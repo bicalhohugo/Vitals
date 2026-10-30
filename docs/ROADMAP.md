@@ -13,14 +13,15 @@
 - [x] `doctor`, `probe` (texto/JSON/serve), 40 testes, build copiando assets.
 - [x] Lançador Windows (`Vitals.bat`) com instalação/build sob demanda.
 - [x] Executável portátil (`npm run dist`), ícone e `.env` ao lado do `.exe`.
+- [x] Instalador NSIS por usuário com atalhos no Desktop e Menu Iniciar.
+- [x] Bandeja do sistema: fechar esconde, menu com saúde/logs e **Sair**.
 - [x] Documentação completa e worklog.
 
 ## Próximo (v0.2)
 
-- [ ] **Assinatura de código + instalador NSIS**. Hoje o portable não é
-      assinado (SmartScreen) e não há atalho no menu Iniciar.
-- [ ] **Bandeja + janela always-on-top opcional**, para deixar o HUD num
-      segundo monitor.
+- [ ] **Assinatura de código**. Portátil e instalador já saem prontos; falta
+      certificado para eliminar o SmartScreen (ver OPERATIONS).
+- [ ] **Janela always-on-top opcional**, para deixar o HUD num segundo monitor.
 - [ ] **Alertas**: notificação do Windows quando commit/VRAM cruzam o limite
       por N amostras (hoje é só cor).
 - [ ] **Histórico por workload**: mini-sparkline de VRAM/commit nas últimas
@@ -34,6 +35,7 @@
 
 ## Backlog
 
+- [ ] Testar portátil/instalador em uma máquina limpa (sem Node, sem `pwsh`).
 - [ ] Suporte a múltiplas máquinas (um HUD agregando sensores via HTTP).
 - [ ] Persistir histórico em SQLite (hoje ring em memória).
 - [ ] Perfil de thresholds por máquina (`.env` ou JSON).

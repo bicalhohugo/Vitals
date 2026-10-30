@@ -14,6 +14,8 @@
     "build": "electron-vite build && node scripts/copy-assets.mjs",
     "start": "electron-vite preview",
     "dist": "npm run build && electron-builder --win portable",
+    "dist:setup": "npm run build && electron-builder --win nsis",
+    "dist:all": "npm run build && electron-builder --win portable nsis",
     "dist:dir": "npm run build && electron-builder --win --dir",
     "typecheck": "npm run typecheck:node && npm run typecheck:web",
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json",

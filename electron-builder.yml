@@ -19,8 +19,22 @@ win:
     - target: portable
       arch:
         - x64
+    - target: nsis
+      arch:
+        - x64
   icon: build/icon.png
-  artifactName: Vitals-${version}-portatil.${ext}
 
 portable:
   artifactName: Vitals-${version}-portatil.${ext}
+
+nsis:
+  artifactName: Vitals-${version}-setup.${ext}
+  oneClick: false
+  perMachine: false
+  allowElevation: true
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: Vitals
+  runAfterFinish: true
+  deleteAppDataOnUninstall: false

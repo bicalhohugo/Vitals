@@ -20,6 +20,8 @@ export interface AppConfig {
   }
   logDir: string
   portsIntervalMs: number
+  /** Icone na bandeja e fechar a janela minimiza para ela. */
+  tray: boolean
 }
 
 function envInt(name: string, fallback: number, min: number, max: number): number {
@@ -88,6 +90,7 @@ export function loadConfig(): AppConfig {
       gracefulTimeoutMs: envInt('VITALS_GRACEFUL_TIMEOUT_MS', 3000, 500, 15000)
     },
     logDir: defaultLogDir(),
-    portsIntervalMs: envInt('VITALS_PORTS_MS', 10_000, 3000, 60_000)
+    portsIntervalMs: envInt('VITALS_PORTS_MS', 10_000, 3000, 60_000),
+    tray: envBool('VITALS_TRAY', true)
   }
 }

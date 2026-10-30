@@ -28,7 +28,8 @@ npm start          # preview do build
 ```
 
 O app abre em 1480×940, tema escuro, pt-BR. A API embutida sobe junto em
-`127.0.0.1:4780` quando `VITALS_HTTP=1`.
+`127.0.0.1:4780` quando `VITALS_HTTP=1`. Ao fechar a janela, o app continua na
+bandeja (veja abaixo).
 
 ## Lançador (Vitals.bat)
 
@@ -56,15 +57,39 @@ Atalho: botão direito em `Vitals.bat` → **Enviar para → Área de trabalho
 > pasta `node_modules`. Para levar para outra máquina sem Node, use o
 > empacotamento abaixo.
 
-## Empacotar (.exe portátil)
+## Bandeja do sistema
+
+O ícone na bandeja (ECG verde) mostra a saúde no tooltip e no menu:
+
+- **Abrir Vitals** — restaura a janela (clique simples também alterna).
+- **Saúde / RAM / commit / GPU** — leitura rápida sem abrir o HUD.
+- **Abrir pasta de logs**.
+- **Sair** — encerra app, motor, HTTP e sensor.
+
+Fechar a janela (X ou Alt+F4) **esconde** o HUD e mantém a telemetria viva: o
+processo continua respondendo em `/api/snapshot`. Para voltar ao comportamento
+antigo, use `VITALS_TRAY=0` (fechar encerra).
+
+O log registra `tray: icone criado` e `minimizada para a bandeja`. Se o ícone
+não puder ser criado, o app **não** esconde a janela ao fechar — assim não fica
+sem como reabrir.
+
+## Empacotar (portátil + instalador)
 
 ```powershell
-npm run dist        # build + electron-builder (portable x64)
-npm run dist:dir    # só dist\win-unpacked\Vitals.exe, sem empacotar
+npm run dist        # portátil x64
+npm run dist:setup  # instalador NSIS x64
+npm run dist:all    # ambos
+npm run dist:dir    # só dist\win-unpacked\Vitals.exe (debug)
 ```
 
-Saída: **`dist\Vitals-<versao>-portatil.exe`** (~106 MB, arquivo único).
-Configuração em `electron-builder.yml`; ícone em `build/icon.png`.
+Saídas:
+
+- `dist\Vitals-<versao>-portatil.exe` (~106 MB, arquivo único);
+- `dist\Vitals-<versao>-setup.exe` (~116 MB, instalador por usuário).
+
+Configuração em `electron-builder.yml`; ícones em `build/icon.png` (app) e
+`build/tray.png` (bandeja, copiado para `out/main` pelo `copy-assets`).
 
 Como o pacote funciona:
 
@@ -76,12 +101,42 @@ Como o pacote funciona:
 - `.env` é procurado, nesta ordem: diretório de trabalho, pasta do `.exe`
   portátil (`PORTABLE_EXECUTABLE_DIR`) e pasta do executável. Para configurar,
   coloque o `.env` **ao lado do `.exe`**.
-- Logs e auditoria continuam em `%APPDATA%\Vitals\logs`.
+- Logs e auditoria continuam em `%APPDATA%\Vitals\logs` e são preservados na
+  desinstalação (`deleteAppDataOnUninstall: false`).
 
-O binário **não é assinado**. Na primeira execução o Windows pode mostrar
-"O Windows protegeu o computador" (SmartScreen); use **Mais informações →
-Executar assim mesmo**. Para distribuir de verdade, configure um certificado
-de assinatura de código.
+### Instalador NSIS
+
+O instalador é **por usuário** (`perMachine: false`), então não pede UAC, e
+assistido (`oneClick: false`), permitindo escolher a pasta. Ele cria atalhos no
+Desktop e no Menu Iniciar, registra "Vitals" em Apps e recursos e instala o
+desinstalador `Uninstall Vitals.exe`.
+
+Instalação/desinstalação silenciosa (deploy ou teste):
+
+```powershell
+Start-Process .\dist\Vitals-0.1.0-setup.exe -ArgumentList '/S','/D=D:\Vitals' -Wait
+& 'D:\Vitals\Uninstall Vitals.exe' /S
+```
+
+`/D=` precisa ser o **último** argumento e sem aspas. O caminho é opcional; sem
+ele, instala em `%LOCALAPPDATA%\Programs\Vitals`.
+
+### Assinatura de código
+
+Sem certificado, o build registra `no code signing certificate configured,
+signing is skipped` e o Windows pode mostrar o SmartScreen ("O Windows protegeu
+o computador" → **Mais informações → Executar assim mesmo**). Para assinar,
+defina as variáveis antes do build:
+
+```powershell
+$env:CSC_LINK = 'C:\certs\vitals.pfx'   # caminho, base64 ou URL
+$env:CSC_KEY_PASSWORD = 'senha-do-pfx'
+npm run dist:all
+```
+
+O electron-builder assina `Vitals.exe`, o portátil e o instalador. Certificado
+EV/HSM ou Azure Trusted Signing exige configuração extra
+(`win.signtoolOptions`) e não está configurado aqui.
 
 Teste rápido do pacote:
 
@@ -221,6 +276,14 @@ Stop-Process -Id <pid>
 
 Ou use `VITALS_HTTP_PORT=4781`.
 
+### Bandeja não aparece / janela fechada não reabre
+
+- Confira `VITALS_TRAY` (padrão `1`); com `0`, fechar encerra e não há bandeja.
+- O log deve ter `tray: icone criado`. Se tiver `tray.png nao encontrado`, rode
+  `npm run build` (o `copy-assets` copia `build/tray.png` para `out/main`).
+- Se a bandeja falhar, o app **não** esconde a janela ao fechar — é proposital,
+  para não deixar o processo sem interface.
+
 ## Logs e auditoria
 
 | Arquivo | Conteúdo |
@@ -235,6 +298,6 @@ Ou use `VITALS_HTTP_PORT=4781`.
 ## Limpeza
 
 - `out/`, `node_modules/`, `logs/` e `.env` não vão para o git.
-- Para parar tudo: feche a janela (o sensor morre junto via `-ParentPid`) ou
-  mate o processo na porta 4780.
+- Para parar tudo: **Sair** no menu da bandeja (o sensor morre junto via
+  `-ParentPid`), ou mate o processo na porta 4780. Fechar a janela só esconde.
 - Se um sensor órfão aparecer: `Get-Process pwsh | Where-Object { $_.CommandLine -like '*windows-sensor*' }`.
